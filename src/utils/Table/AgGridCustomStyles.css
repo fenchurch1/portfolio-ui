@@ -1,0 +1,113 @@
+/* ------------------------
+   Base: Light Theme
+------------------------ */
+.ag-theme-alpine {
+  --ag-background-color: var(--mantine-color-body, #ffffff);
+  --ag-header-background-color: var(--mantine-color-blue-1, #e7f5ff);
+  --ag-row-hover-color: var(--mantine-color-blue-0, #f0f4ff);
+  --ag-font-family: 'Inter', sans-serif;
+  --ag-font-size: 14px;
+  --ag-border-color: var(--mantine-color-gray-3, #dee2e6);
+  --ag-odd-row-background-color: var(--mantine-color-gray-0, #f8f9fa);
+  --ag-even-row-background-color: var(--mantine-color-white, #ffffff);
+  --ag-header-font-color: var(--mantine-color-dark-8, #212529);
+  --ag-wrapper-border-radius:10px
+}
+
+/* ------------------------
+   Dark Theme Overrides
+------------------------ */
+.mantine-dark .ag-theme-alpine-dark {
+  --ag-background-color: var(--mantine-color-dark-6, #1a1b1e);
+  --ag-header-background-color: var(--mantine-color-dark-4, #2c2e33);
+  --ag-row-hover-color: var(--mantine-color-dark-3, #343a40);
+  --ag-border-color: var(--mantine-color-dark-3, #2c2e33);
+  --ag-odd-row-background-color: var(--mantine-color-dark-5, #25262b);
+  --ag-even-row-background-color: var(--mantine-color-dark-6, #1a1b1e);
+  --ag-header-font-color: var(--mantine-color-gray-2, #ced4da);
+  --ag-wrapper-border-radius:10px
+}
+
+/* ------------------------
+   Header Styling
+------------------------ */
+.ag-header {
+  background-color: var(--ag-header-background-color) !important;
+  color: var(--ag-header-font-color) !important;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid var(--ag-border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ------------------------
+   Row Styling
+------------------------ */
+.ag-row {
+  border-bottom: 1px solid var(--ag-border-color);
+  height: 48px !important;
+}
+
+.ag-row-odd {
+  background-color: var(--ag-odd-row-background-color);
+}
+
+.ag-row-even {
+  background-color: var(--ag-even-row-background-color);
+}
+
+/* ------------------------
+   Row Hover
+------------------------ */
+.ag-row-hover {
+  background-color: var(--ag-row-hover-color) !important;
+}
+
+/* ------------------------
+   Cell Styling
+------------------------ */
+.ag-cell {
+  border-right: 1px solid var(--ag-border-color);
+  padding: 0 8px;
+}
+
+/* ------------------------
+   Responsive Wrapper
+------------------------ */
+.ag-root-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 15px;
+}
+
+/* ------------------------
+   Pagination Panel
+------------------------ */
+.ag-paging-panel {
+  justify-content: space-between !important;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Apply right border to all cells */
+.ag-cell {
+  border-right: 1px solid var(--ag-border-color, #e0e0e0)!important;
+  padding: 8px;
+}
+
+/* Optional: Remove the border on the last column */
+.ag-cell:last-of-type {
+  border-right: none;
+}
+
+/* Hide Scroll for Ag Grid */
+.ag-root-wrapper-body,
+.ag-body-viewport {
+  scrollbar-width: none; /* Firefox */
+}
+
+.ag-root-wrapper-body::-webkit-scrollbar,
+.ag-body-viewport::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+

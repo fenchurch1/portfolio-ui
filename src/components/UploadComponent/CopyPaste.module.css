@@ -1,0 +1,10 @@
+.hfull{
+    height: 100%;
+}
+.wfull{
+    width: 100%;
+}
+.tableCell {
+  border: 1px solid #ccc; /* Light gray border */
+  padding: 4px 8px;
+}

@@ -1,0 +1,9 @@
+/* styles/ag-grid-custom.css */
+.ag-theme-alpine {
+  --ag-background-color: var(--mantine-color-body);
+  --ag-header-background-color: var(--mantine-color-gray-1);
+  --ag-header-foreground-color: var(--mantine-color-dark);
+  --ag-odd-row-background-color: var(--mantine-color-gray-0);
+  --ag-font-family: var(--mantine-font-family);
+  --ag-font-size: 14px;
+}

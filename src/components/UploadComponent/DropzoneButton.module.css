@@ -1,0 +1,52 @@
+.wrapper {
+  border: 2px dotted gray;
+  width: 600px;
+  border-radius: 30px;
+  overflow: hidden; /* Ensures rounded corners render properly */
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.custom-dotted-border {
+  border: 3px solid transparent;
+  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='3'%3E%3Ccircle cx='1' cy='1' r='1' fill='gray'/%3E%3C/svg%3E") 1 round;
+}
+
+.wrapper:hover {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-4));
+  border-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
+}
+
+.dropzone {
+  border-width: 1px;
+  padding-bottom: 50px;
+  color: var(--mantine-color-bright);
+  background-color: transparent; /* Let wrapper handle bg */
+  height: 100%;
+  width: 100%;
+  border-radius: inherit; /* Match parent rounding */
+}
+
+.icon {
+  color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-white));
+}
+
+.control {
+  position: absolute;
+  width: 250px;
+  left: calc(50% - 125px);
+  bottom: -20px;
+}
+
+.description {
+  text-align: center;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.buttons {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}

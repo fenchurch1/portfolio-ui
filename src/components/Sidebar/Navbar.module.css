@@ -1,0 +1,67 @@
+.sidebar {
+  height: 100vh;
+  border-right: 1px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-body);
+}
+
+/* Shared base styles for link */
+.link {
+  position: relative;
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-sm);
+  font-weight: 500;
+  color: var(--mantine-color-text);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover state */
+.link:hover {
+  background-color: var(--mantine-color-blue-0);
+  color: var(--mantine-color-blue-7);
+}
+
+.link:hover::after {
+  width: calc(100% - 2 * var(--mantine-spacing-md));
+  background-color: var(--mantine-color-blue-5);
+}
+
+/* Hover underline effect */
+.link::after {
+  content: '';
+  position: absolute;
+  left: var(--mantine-spacing-md);
+  bottom: 4px;
+  width: 0;
+  height: 2px;
+  background-color: transparent;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Active tab */
+.activeLink {
+  /* composes: link; */
+  font-weight: 700;
+  color: var(--mantine-color-blue-7);
+  background-color: var(--mantine-color-blue-0);
+  box-shadow: inset 4px 0 0 var(--mantine-color-blue-8); /* left border indicator */
+}
+
+/* Edit And delete icons css */
+/* NavBar.module.css */
+.portfolioRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions {
+  display: none;
+  margin-left: auto;
+}
+
+.portfolioRow:hover .actions {
+  display: flex;
+}
+
+

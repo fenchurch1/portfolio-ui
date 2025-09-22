@@ -8,3 +8,15 @@
   border: 1px solid #ccc; /* Light gray border */
   padding: 4px 8px;
 }
+.validRow {
+  background-color: rgba(0, 255, 0, 0.15) !important;
+}
+
+.invalidRow {
+  background-color: rgba(255, 0, 0, 0.15) !important;
+}
+
+.errorCell {
+  font-size: 12px;
+  padding-left: 8px;
+}

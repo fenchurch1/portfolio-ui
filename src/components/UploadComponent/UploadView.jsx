@@ -111,7 +111,7 @@ const UploadView = () => {
       <Center>
         {
           checked ?
-            <CopyPaste setPastedData={setPastedData} />
+            <CopyPaste setPastedData={setPastedData} headerIncluded={HeaderChecked}/>
             : <DropZoneButton ExtractFile={ExtractFile} />
         }
 

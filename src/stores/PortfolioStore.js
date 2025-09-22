@@ -49,14 +49,14 @@ class PortfolioStore {
   async addPortfolio({ fileName, Comment, portfolioName, data,SharedWithteam }) {
     this.loading = true;
     this.error = null;
-    const poolValue = data.Exceldata[0]?.pool_id;
-    const cusipValue = data.Exceldata[0]?.Cusip_id;
+    const poolValue = data.Exceldata[0]?.pool_number;
+    const cusipValue = data.Exceldata[0]?.cusip;
 
     const PoolId = poolValue ? poolValue.match(/^[A-Za-z]{2} [A-Za-z0-9]{6}$/) : null;
     const CusipId = cusipValue ? cusipValue.match(/^[A-Za-z0-9]{9}$/) : null;
     const Data = data.Exceldata?.map((item) => {
       return {
-        cusip: item.pool_id || item.Cusip_id,
+        cusip: item.pool_number || item.cusip,
         value: item.face_amt || item.orig_face || null,
       }
     })

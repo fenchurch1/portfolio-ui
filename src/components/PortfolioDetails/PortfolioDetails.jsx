@@ -73,7 +73,7 @@ const PortfolioDetails = () => {
                 });
 
                 const InvalidPools =
-                    response.pool_count - response.unknown_pools - response.valid_pools;
+                    response.pool_count - response.valid_pools;
 
                 const cards = [
                     {

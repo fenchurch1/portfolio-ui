@@ -53,9 +53,9 @@ const UploadView = () => {
 
         item.forEach((subItem) => {
           if (cusipRegex.test(subItem)) {
-            Obj.Cusip_id = subItem;
+            Obj.cusip = subItem;
           } else if (poolRegex.test(subItem)) {
-            Obj.pool_id = subItem;
+            Obj.pool_number = subItem;
           } else {
             Obj.orig_face = subItem;
           }

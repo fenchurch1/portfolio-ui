@@ -4,211 +4,160 @@ import { apiClient } from "../../API/apiservises";
 import APIEndpoints from "../../API/profile/APIEndpoints";
 import { useParams } from "react-router-dom";
 import PortfolioGrid from "@utils/Table/PortfolioGrid";
-import PortfolioGraph from "../PortfolioDetails/PortfolioGraph";
+import PortfolioGraph from "@components/PortfolioDetails/PortfolioGraph";
 import BadgesList from "@utils/Badge/BadgesList";
 import SharePortfolioModal from "@components/AllPortfolios/SharePortfolioModal";
+
 const PortfolioDetails = () => {
-    const computedColorScheme = useComputedColorScheme();
-    const UserId = localStorage.getItem("UserId");
-    const themeClass =
-        computedColorScheme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
+  const computedColorScheme = useComputedColorScheme();
+  const UserId = localStorage.getItem("UserId");
+  const themeClass = computedColorScheme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
+  const { portfolioId } = useParams();
 
-    const { portfolioId } = useParams();
-    const [columDefsForPools, setColumnDefsForPools] = useState([]);
-    const [selectedPortfolioData, setSelectedPortfolioData] = useState([]);
-    const [CardsData, setCardsData] = useState([]);
-    const [shareOpened, setShareOpened] = useState(false)
-    const [selectedPortfolio, setSelectedPortfolio] = useState(null);
-    const [portfolioMeta, setPortfolioMeta] = useState({
-        name: "",
-        sharedBy: "",
-        team: "",
-    });
+  // Combine related state into one object to reduce multiple renders
+  const [portfolioData, setPortfolioData] = useState({
+    columnDefs: [],
+    rowData: [],
+    cards: [],
+    meta: { name: "", sharedBy: "", team: "", IsOwner: false }
+  });
 
-    const defaultColDef = useMemo(
-        () => ({
-            sortable: true,
-            filter: true,
-            resizable: true,
-            flex: 1,
-            minWidth: 100,
-        }),
-        []
-    );
+  const [shareOpened, setShareOpened] = useState(false);
 
-    useEffect(() => {
-        if (!portfolioId) return;
+  const defaultColDef = useMemo(() => ({
+    sortable: true,
+    filter: true,
+    resizable: true,
+    flex: 1,
+    minWidth: 100,
+  }), []);
 
-        const fetchPortfolioDetails = async () => {
-            try {
-                const response = await apiClient.get(
-                    APIEndpoints.getPortfolioById
-                        .replace("{userId}", UserId)
-                        .replace("{portfolioId}", portfolioId)
-                );
+  useEffect(() => {
+    if (!portfolioId) return;
+    let isMounted = true; // prevent updates after unmount
 
-                const data = response?.portfolio_data || [];
-                setSelectedPortfolioData(data);
+    const fetchPortfolioDetails = async () => {
+      try {
+        const response = await apiClient.get(
+          APIEndpoints.getPortfolioById
+            .replace("{userId}", UserId)
+            .replace("{portfolioId}", portfolioId)
+        );
 
-                // ✅ Extract portfolio meta info
-                setPortfolioMeta({
-                    name: response?.portfolio_name || "Unnamed Portfolio",
-                    sharedBy: response?.shared_by || "N/A",
-                    team: response?.team_name || "N/A",
-                    IsOwner:response?.is_owner || false,
-                });
+        if (!isMounted) return;
 
-                const allKeys = new Set();
-                const FinalObj = {
-                    PoolCount: 0,
-                    unknownpools: 0,
-                    validpools: 0,
-                };
+        const data = response?.portfolio_data || [];
 
-                data.forEach((obj) => {
-                    Object.keys(obj).forEach((key) => allKeys.add(key));
-                    FinalObj.PoolCount += obj.pool_count || 0;
-                    FinalObj.unknownpools += obj.unknown_pools || 0;
-                    FinalObj.validpools += obj.valid_pools || 0;
-                });
+        const InvalidPools = response.pool_count - response.valid_pools;
 
-                const InvalidPools =
-                    response.pool_count - response.valid_pools;
+        const cards = [
+          { label: "Pool Count", value: response.pool_count, BackgroundColor: "#e0e0e0" },
+          { label: "Unknown Pools", value: response.unknown_pools, BackgroundColor: "#FFF3CD", TextColor: "#7A4D00" },
+          { label: "Valid Pools", value: response.valid_pools, BackgroundColor: "#D4EDDA", TextColor: "#155724" },
+          { label: "Invalid Pools", value: InvalidPools, BackgroundColor: "#F8D7DA", TextColor: "#721C24" },
+        ];
 
-                const cards = [
-                    {
-                        label: "Pool Count",
-                        value: response.pool_count,
-                        BackgroundColor: "#e0e0e0",
-                    },
-                    {
-                        label: "Unknown Pools",
-                        value: response.unknown_pools,
-                        BackgroundColor: "#FFF3CD",
-                        TextColor: "#7A4D00",
-                    },
-                    {
-                        label: "Valid Pools",
-                        value: response.valid_pools,
-                        BackgroundColor: "#D4EDDA",
-                        TextColor: "#155724",
-                    },
-                    {
-                        label: "Invalid Pools",
-                        value: InvalidPools,
-                        BackgroundColor: "#F8D7DA",
-                        TextColor: "#721C24",
-                    },
-                ];
-                setCardsData(cards);
+        const columnDefs = Array.from(response?.table_headers || []).map(key => ({
+          headerName: key,
+          field: key,
+          flex: 1,
+        }));
 
-                const columnDefs = Array.from(allKeys).map((key) => ({
-                    headerName: key,
-                    field: key,
-                    flex: 1,
-                }));
-                setColumnDefsForPools(columnDefs);
-            } catch (error) {
-                console.error("Error fetching portfolios:", error);
-            }
-        };
+        setPortfolioData({
+          columnDefs,
+          rowData: data,
+          cards,
+          meta: {
+            name: response?.portfolio_name || "Unnamed Portfolio",
+            sharedBy: response?.shared_by || "N/A",
+            team: response?.team_name || "N/A",
+            IsOwner: response?.is_owner || false
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching portfolios:", error);
+      }
+    };
 
-        fetchPortfolioDetails();
-    }, [portfolioId]);
+    fetchPortfolioDetails();
 
-    const sharedPortfolio = async (selected) => {debugger
-        console.log("Selected", selected);
-        const body =
-        {
-            "owner_user_id": UserId,
-            "portfolio_id": portfolioId,
-            "shared_with_user_id": selected
-        }
+    return () => {
+      isMounted = false;
+      // clear large data to free memory
+      setPortfolioData({
+        columnDefs: [],
+        rowData: [],
+        cards: [],
+        meta: { name: "", sharedBy: "", team: "", IsOwner: false }
+      });
+    };
+  }, [portfolioId]);
 
-        try {
-            const response = await apiClient.post(
-                APIEndpoints.sharePortfolio,
-                '', body
-            );
-            const data = response || {};
-
-        } catch (error) {
-            console.error("Error fetching portfolios:", error);
-        }
-
+  const sharedPortfolio = async (selected) => {
+    try {
+      const body = {
+        owner_user_id: UserId,
+        portfolio_id: portfolioId,
+        shared_with_user_id: selected
+      };
+      await apiClient.post(APIEndpoints.sharePortfolio, '', body);
+    } catch (error) {
+      console.error("Error sharing portfolio:", error);
     }
-    return (
-        <div className="space-y-4">
-            {/* 📌 Top Meta Information */}
-            <Card shadow="sm" radius="lg" withBorder p="lg">
-                <Stack spacing="xs">
-                    <Group spacing="lg" justify="space-between" align="center" w="100%">
-                        <Text size="xl" fw={700}>
-                            Portfolio Name: {portfolioMeta.name}
-                        </Text>
-                        <Button
-                            variant="outline"
-                            onClick={() =>
-                                setShareOpened(true)
-                            }
-                         disabled={!portfolioMeta.IsOwner}
-                        >
-                            Share
-                        </Button>
-                    </Group>
+  };
 
-                    <Group justify="space-between" align="center" w="100%">
-                        {/* Left Side: Two Badges */}
-                        <Group spacing="sm">
-                            <Badge color="blue" variant="light">
-                                Shared By: {portfolioMeta.sharedBy}
-                            </Badge>
-                            <Badge color="teal" variant="light">
-                                Team: {portfolioMeta.team}
-                            </Badge>
-                        </Group>
+  return (
+    <div className="space-y-4">
+      <Card shadow="sm" radius="lg" withBorder p="lg">
+        <Stack spacing="xs">
+          <Group spacing="lg" justify="space-between" align="center" w="100%">
+            <Text size="xl" fw={700}>Portfolio Name: {portfolioData.meta.name}</Text>
+            <Button variant="outline" onClick={() => setShareOpened(true)} disabled={!portfolioData.meta.IsOwner}>Share</Button>
+          </Group>
 
-                        {/* Right Side: BadgesList */}
-                        <BadgesList data={CardsData} />
-                    </Group>
+          <Group justify="space-between" align="center" w="100%">
+            <Group spacing="sm">
+              <Badge color="blue" variant="light">Shared By: {portfolioData.meta.sharedBy}</Badge>
+              <Badge color="teal" variant="light">Team: {portfolioData.meta.team}</Badge>
+            </Group>
+            <BadgesList data={portfolioData.cards} />
+          </Group>
+        </Stack>
+      </Card>
 
-                </Stack>
-            </Card>
+      <Tabs defaultValue="portfolioDetails">
+        <Tabs.List>
+          <Tabs.Tab value="portfolioDetails">Portfolio Details</Tabs.Tab>
+          <Tabs.Tab value="portfolioGraph">Portfolio Graph</Tabs.Tab>
+        </Tabs.List>
 
+        <Tabs.Panel value="portfolioDetails">
             <br />
-            {/* 📌 Tabs */}
-            <Tabs defaultValue="portfolioDetails">
-                <Tabs.List>
-                    <Tabs.Tab value="portfolioDetails">Portfolio Details</Tabs.Tab>
-                    <Tabs.Tab value="portfolioGraph">Portfolio Graph</Tabs.Tab>
-                </Tabs.List>
-
-                <Tabs.Panel value="portfolioDetails">
-                    <br />
-                    <div className={themeClass} style={{ height: 400, width: "100%" }}>
-                        <PortfolioGrid
-                            rowData={selectedPortfolioData}
-                            columnDefs={columDefsForPools}
-                            defaultColDef={defaultColDef}
-                        />
-                    </div>
-                </Tabs.Panel>
-
-                <Tabs.Panel value="portfolioGraph">
-                    <br />
-                    <div className={themeClass} style={{ height: 400, width: "100%" }}>
-                        <PortfolioGraph selectedPortfolioData={selectedPortfolioData} />
-                    </div>
-                </Tabs.Panel>
-            </Tabs>
-            <SharePortfolioModal
-                opened={shareOpened}
-                onClose={() => setShareOpened(false)}
-                portfolioName={selectedPortfolio?.portfolio_name}
-                onSave={sharedPortfolio}
+          <div className={themeClass} style={{ height: 600, width: "100%" }}>
+            <PortfolioGrid
+              rowData={portfolioData.rowData}
+              columnDefs={portfolioData.columnDefs}
+              defaultColDef={defaultColDef}
             />
-        </div>
-    );
+          </div>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="portfolioGraph">
+            <br />
+          <div className={themeClass} style={{ height: 400, width: "100%" }}>
+            <PortfolioGraph selectedPortfolioData={portfolioData.rowData} />
+          </div>
+        </Tabs.Panel>
+      </Tabs>
+
+      <SharePortfolioModal
+        opened={shareOpened}
+        onClose={() => setShareOpened(false)}
+        portfolioName={portfolioData.meta.name}
+        onSave={sharedPortfolio}
+      />
+    </div>
+  );
 };
 
 export default PortfolioDetails;

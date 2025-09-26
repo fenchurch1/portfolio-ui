@@ -215,7 +215,7 @@ const HeaderBar = observer(() => {
             <Menu.Target>
               <UnstyledButton>
                 <Avatar radius="xl" color="white" size="md" src={user.avatar}>
-                  MK
+                  {LoginData?.username?.substring(0, 2)}
                 </Avatar>
               </UnstyledButton>
             </Menu.Target>
@@ -224,7 +224,7 @@ const HeaderBar = observer(() => {
               <Menu.Item>
                 <Group>
                   <Avatar src={user.avatar} radius="xl">
-                    MK
+                    {LoginData?.username?.substring(0, 2)}
                   </Avatar>
                   <div>
                     <Text size="sm" fw={500}>

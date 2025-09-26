@@ -184,7 +184,7 @@ const UploadView = () => {
             disabled={!portfolioName || (!file && pastedData.length === 0)}
             style={{ float: "right" }}
           >
-            Finish Upload
+            Create portfolio
           </Button>
         </Stepper.Step>
 

@@ -79,6 +79,12 @@ const AllPortfolioDetails = observer(() => {
                     state: { portfolioId: params.data.portfolio_id },
                   })
                 }
+                style={{
+                  backgroundColor: "transparent", // default transparent
+                  transition: "background-color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#00BFFF")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 Holdings
               </Button>
@@ -87,6 +93,7 @@ const AllPortfolioDetails = observer(() => {
             cellStyle: { display: "flex", justifyContent: "center" },
             headerClass: "ag-center-header",
           });
+
 
           return colDefs;
         };

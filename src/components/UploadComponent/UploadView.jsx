@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Button,
   TextInput,
@@ -6,84 +6,90 @@ import {
   Center,
   Flex,
   Checkbox,
-} from '@mantine/core';
-import { portfolioStore } from '../../stores/PortfolioStore';
-import PortfolioGrid from '@utils/Table/PortfolioGrid';
-import DropZoneButton from '@components/UploadComponent/DropZoneButton';
-import { apiClient } from '@API/apiservises';
-import APIEndpoints from '@API/profile/APIEndpoints';
-import CopyPaste from '@components/UploadComponent/CopyPaste';
+  Stepper,
+} from "@mantine/core";
+import { portfolioStore } from "../../stores/PortfolioStore";
+import PortfolioGrid from "@utils/Table/PortfolioGrid";
+import DropZoneButton from "@components/UploadComponent/DropZoneButton";
+import { apiClient } from "@API/apiservises";
+import APIEndpoints from "@API/profile/APIEndpoints";
+import CopyPaste from "@components/UploadComponent/CopyPaste";
+import { toast } from "react-toastify";
 
 const UploadView = () => {
-  const [portfolioName, setPortfolioName] = useState('');
-  const [Comment, setComment] = useState('');
+  const [active, setActive] = useState(0); // step index
+  const [portfolioName, setPortfolioName] = useState("");
+  const [comment, setComment] = useState("");
   const [file, setFile] = useState(null);
-  const [data, setData] = useState({ fileId: '', Exceldata: [] });
+  const [data, setData] = useState({ fileId: "", Exceldata: [] });
   const [columnDefs, setColumnDefs] = useState([]);
   const [checked, setChecked] = useState(false);
-  const [HeaderChecked, setHeaderChecked] = useState(false);
-   const [SharedWithteam, setSharedWithteam] = useState(false);
-  const [PastedData, setPastedData] = useState([]);
+  const [headerChecked, setHeaderChecked] = useState(false);
+  const [sharedWithTeam, setSharedWithTeam] = useState(false);
+  const [pastedData, setPastedData] = useState([]);
+
+  // Generate columnDefs dynamically
   useEffect(() => {
     const allKeys = new Set();
-    data.Exceldata.forEach(obj => {
-      Object.keys(obj).forEach(key => allKeys.add(key));
+    data.Exceldata.forEach((obj) => {
+      Object.keys(obj).forEach((key) => allKeys.add(key));
     });
 
-    // ✅ Generate columnDefs from unique keys
-    let columnDefs = Array.from(allKeys).map((key) => ({
+    let defs = Array.from(allKeys).map((key) => ({
       headerName: key,
       field: key,
       flex: 1,
     }));
-    setColumnDefs(columnDefs);
-  }, [portfolioStore.portfolios, data.Exceldata]);
+    setColumnDefs(defs);
+  }, [data.Exceldata]);
 
   const handleUpload = async () => {
-    if (checked && PastedData.length === 0) {
-      alert("Please paste data before uploading.");
+    if (checked && pastedData.length === 0) {
+      toast.error("Please paste data before uploading.");
       return;
     }
-    if (checked && PastedData.length > 0) {
+
+    let processedData = data.Exceldata;
+
+    if (checked && pastedData.length > 0) {
       const poolRegex = /^[A-Za-z]{2} [A-Za-z0-9]{6}$/;
       const cusipRegex = /^[A-Za-z0-9]{9}$/;
 
-      const ModifiedData = PastedData.map((item) => {
-        const Obj = {};
-
+      processedData = pastedData.map((item) => {
+        const obj= {};
         item.forEach((subItem) => {
-          if (cusipRegex.test(subItem)) {
-            Obj.cusip = subItem;
-          } else if (poolRegex.test(subItem)) {
-            Obj.pool_number = subItem;
-          } else {
-            Obj.orig_face = subItem;
-          }
+          if (cusipRegex.test(subItem)) obj.cusip = subItem;
+          else if (poolRegex.test(subItem)) obj.pool_number = subItem;
+          else obj.orig_face = subItem;
         });
-
-        return Obj; // ✅ make sure to return Obj
+        return obj;
       });
-
-      data.Exceldata = ModifiedData;
     }
 
     portfolioStore.addPortfolio({
-      PastedDatafileName: PastedData ? "" : file.name,
+      fileName: checked ? "" : file?.name,
       portfolioName,
-      Comment,
-      data: data,
-      SharedWithteam:SharedWithteam
+      comment,
+      data: { ...data, Exceldata: processedData },
+      sharedWithTeam,
     });
+
   };
-  const ExtractFile = async (file) => {
+
+  const extractFile = async (file) => {
     const formData = new FormData();
-    formData.append('filename', file);
-    formData.append('user_id', 1);
+    formData.append("filename", file);
+    formData.append("user_id", 1);
     try {
-      const response = await apiClient.post(APIEndpoints.uploadFile, '', formData, true);
-      // Update states
+      const response = await apiClient.post(
+        APIEndpoints.uploadFile,
+        "",
+        formData,
+        true
+      );
       setFile(file);
-      setData({ file_id: response?.file_id, Exceldata: response.data }); // Reset data when a new file is selected
+      setData({ file_id: response?.file_id, Exceldata: response.data });
+      setActive(1); // move to step 2 after upload
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -91,54 +97,102 @@ const UploadView = () => {
 
   return (
     <Stack>
-      <Flex gap={'20px'} align="center">
-        <TextInput
-          label="Portfolio Name"
-          placeholder='Portfolio Name'
-          value={portfolioName}
-          onChange={(e) => setPortfolioName(e.target.value)}
-          required
-        />
-        <TextInput
-          label="Comments"
-          placeholder='Comments'
-          value={Comment}
-          onChange={(e) => setComment(e.target.value)}
-          required
-        />
-      </Flex>
+      <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
+        {/* ---------------- STEP 1 ---------------- */}
+        <Stepper.Step label="Upload Data" description="Upload file or paste data">
+          <Center>
+            {checked ? (
+              <CopyPaste
+                setPastedData={setPastedData}
+                headerIncluded={headerChecked}
+              />
+            ) : (
+              <DropZoneButton ExtractFile={extractFile} />
+            )}
+          </Center>
 
-      <Center>
-        {
-          checked ?
-            <CopyPaste setPastedData={setPastedData} headerIncluded={HeaderChecked}/>
-            : <DropZoneButton ExtractFile={ExtractFile} />
-        }
+          <Flex gap="20px" align="center" mt="lg">
+            <Checkbox
+              label="Paste Data"
+              checked={checked}
+              onChange={(e) => setChecked(e.currentTarget.checked)}
+            />
+            <Checkbox
+              label="Including Header"
+              checked={headerChecked}
+              onChange={(e) => setHeaderChecked(e.currentTarget.checked)}
+            />
+          </Flex>
 
-      </Center>
-      <Flex gap={'20px'} align="center">
-        <Checkbox
-          label="Paste Data"
-          checked={checked}
-          onChange={(event) => setChecked(event.currentTarget.checked)}
-        />
-        <Checkbox
-          label="Including Header"
-          checked={HeaderChecked}
-          onChange={(event) => setHeaderChecked(event.currentTarget.checked)}
-        />
-        <Checkbox
-          label="Shared With team"
-          checked={SharedWithteam}
-          onChange={(event) => setSharedWithteam(event.currentTarget.checked)}
-        />
-      </Flex>
+          <Button
+            mt="lg"
+            onClick={() => setActive(1)}
+            disabled={!checked && !file}
+             style={{ float: "right" }}
+          >
+            Next
+          </Button>
+        </Stepper.Step>
 
-      <Button onClick={handleUpload} disabled={checked ? !portfolioName : !file || !portfolioName}>
-        Upload
-      </Button>
+        {/* ---------------- STEP 2 ---------------- */}
+        <Stepper.Step label="Review Data" description="Validate uploaded data">
+          {data.Exceldata.length > 0 || pastedData.length > 0 ? (
+            <>
+              <PortfolioGrid
+                rowData={checked ? pastedData : data.Exceldata}
+                columnDefs={columnDefs}
+              />
+              <Flex gap="10px" mt="md">
+                <Button onClick={() => setActive(0)}>Re-upload</Button>
+                <Button onClick={() => setActive(2)}  style={{ float: "right" }}>Next</Button>
+              </Flex>
+            </>
+          ) : (
+            <Center>No data found. Please re-upload or paste data.</Center>
+          )}
+        </Stepper.Step>
 
-      {data.Exceldata.length > 0 && <PortfolioGrid rowData={data.Exceldata} columnDefs={columnDefs} />}
+        {/* ---------------- STEP 3 ---------------- */}
+        <Stepper.Step label="Finalize" description="Add details & upload">
+          <Flex gap="20px" align="center">
+            <TextInput
+              label="Portfolio Name"
+              placeholder="Portfolio Name"
+              value={portfolioName}
+              onChange={(e) => setPortfolioName(e.target.value)}
+              required
+            />
+            <TextInput
+              label="Comments"
+              placeholder="Comments"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              required
+            />
+          </Flex>
+
+          <Checkbox
+            mt="md"
+            label="Shared With Team"
+            checked={sharedWithTeam}
+            onChange={(e) => setSharedWithTeam(e.currentTarget.checked)}
+          />
+
+          <Button
+            mt="lg"
+            onClick={handleUpload}
+            disabled={!portfolioName || (!file && pastedData.length === 0)}
+            style={{ float: "right" }}
+          >
+            Finish Upload
+          </Button>
+        </Stepper.Step>
+
+        {/* ---------------- COMPLETED ---------------- */}
+        <Stepper.Completed>
+          Portfolio process completed!
+        </Stepper.Completed>
+      </Stepper>
     </Stack>
   );
 };

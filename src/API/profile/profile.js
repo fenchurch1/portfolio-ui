@@ -1,5 +1,5 @@
 const profile = {
-    dev:"http://172.20.1.81:5000",
+    dev:"http://172.20.1.80:5000",
     prod:"https://api.example.com",
     Test:"https://staging.api.example.com",
     getBaseUrl: function() {

@@ -7,6 +7,10 @@ import {
   Flex,
   Checkbox,
   Stepper,
+  Card,
+  Text,
+  Badge,
+  Divider,
 } from "@mantine/core";
 import { portfolioStore } from "../../stores/PortfolioStore";
 import PortfolioGrid from "@utils/Table/PortfolioGrid";
@@ -56,7 +60,7 @@ const UploadView = () => {
       const cusipRegex = /^[A-Za-z0-9]{9}$/;
 
       processedData = pastedData.map((item) => {
-        const obj= {};
+        const obj = {};
         item.forEach((subItem) => {
           if (cusipRegex.test(subItem)) obj.cusip = subItem;
           else if (poolRegex.test(subItem)) obj.pool_number = subItem;
@@ -74,6 +78,7 @@ const UploadView = () => {
       sharedWithTeam,
     });
 
+    setActive(3);
   };
 
   const extractFile = async (file) => {
@@ -96,104 +101,152 @@ const UploadView = () => {
   };
 
   return (
-    <Stack>
-      <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
-        {/* ---------------- STEP 1 ---------------- */}
-        <Stepper.Step label="Upload Data" description="Upload file or paste data">
-          <Center>
-            {checked ? (
-              <CopyPaste
-                setPastedData={setPastedData}
-                headerIncluded={headerChecked}
-              />
-            ) : (
-              <DropZoneButton ExtractFile={extractFile} />
-            )}
-          </Center>
+    <>
+      <Flex
+        align="center"
+        justify="space-between"
+        wrap="wrap"
+        mb="md"
+        style={{ fontSize: "14px", color: "#adb5bd" }}
+      >
+        <Badge color="teal" variant="light" radius="sm">
+          1. Upload cusip/pool (face amount optional)
+        </Badge>
+        <Divider orientation="vertical" mx="sm" />
+        <Badge color="blue" variant="light" radius="sm">
+          2. Copy & paste columns (optional)
+        </Badge>
+        <Divider orientation="vertical" mx="sm" />
+        <Badge color="grape" variant="light" radius="sm">
+          3. Preview before next step
+        </Badge>
+      </Flex>
+      <Flex gap="lg" align="flex-start">
+        {/* Left: Stepper only */}
+        <Stepper
+          active={active}
+          onStepClick={setActive}
+          orientation="vertical"
+          allowNextStepsSelect={false}
+          style={{ minWidth: 200}}
+        >
+          <Stepper.Step label="Upload Data" description="Upload or paste data" />
+          <Stepper.Step label="Review Data" description="Validate uploaded data" />
+          <Stepper.Step label="Finalize" description="Add details & upload" />
+          <Stepper.Completed>Done</Stepper.Completed>
+        </Stepper>
 
-          <Flex gap="20px" align="center" mt="lg">
-            <Checkbox
-              label="Paste Data"
-              checked={checked}
-              onChange={(e) => setChecked(e.currentTarget.checked)}
-            />
-            <Checkbox
-              label="Including Header"
-              checked={headerChecked}
-              onChange={(e) => setHeaderChecked(e.currentTarget.checked)}
-            />
-          </Flex>
-
-          <Button
-            mt="lg"
-            onClick={() => setActive(1)}
-            disabled={!checked && !file}
-             style={{ float: "right" }}
-          >
-            Next
-          </Button>
-        </Stepper.Step>
-
-        {/* ---------------- STEP 2 ---------------- */}
-        <Stepper.Step label="Review Data" description="Validate uploaded data">
-          {data.Exceldata.length > 0 || pastedData.length > 0 ? (
+        {/* Right: Step Content inside Card */}
+        <Card shadow="md" mih={230} radius="lg"  style={{ flex: 1 }}>
+          {active === 0 && (
             <>
-              <PortfolioGrid
-                rowData={checked ? pastedData : data.Exceldata}
-                columnDefs={columnDefs}
-              />
-              <Flex gap="10px" mt="md">
-                <Button onClick={() => setActive(0)}>Re-upload</Button>
-                <Button onClick={() => setActive(2)}  style={{ float: "right" }}>Next</Button>
+              <Center>
+                {checked ? (
+                  <CopyPaste
+                    setPastedData={setPastedData}
+                    headerIncluded={headerChecked}
+                  />
+                ) : (
+                  <DropZoneButton ExtractFile={extractFile} height={150} />
+                )}
+              </Center>
+
+              <Flex gap="20px" align="center"  justify='space-between'>
+                <Flex gap="20px" align="center">
+                  <Checkbox
+                    label="Paste Data"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.currentTarget.checked)}
+                  />
+                  <Checkbox
+                    label="Including Header"
+                    checked={headerChecked}
+                    onChange={(e) => setHeaderChecked(e.currentTarget.checked)}
+                  />
+                </Flex>
+                <Button
+                  mt="lg"
+                  onClick={() => setActive(1)}
+                  disabled={!checked && !file}
+                  style={{ float: "right" }}
+                >
+                  Next
+                </Button>
               </Flex>
+
+
             </>
-          ) : (
-            <Center>No data found. Please re-upload or paste data.</Center>
           )}
-        </Stepper.Step>
 
-        {/* ---------------- STEP 3 ---------------- */}
-        <Stepper.Step label="Finalize" description="Add details & upload">
-          <Flex gap="20px" align="center">
-            <TextInput
-              label="Portfolio Name"
-              placeholder="Portfolio Name"
-              value={portfolioName}
-              onChange={(e) => setPortfolioName(e.target.value)}
-              required
-            />
-            <TextInput
-              label="Comments"
-              placeholder="Comments"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              required
-            />
-          </Flex>
+          {active === 1 && (
+            <>
+              {data.Exceldata.length > 0 || pastedData.length > 0 ? (
+                <>
+                  <PortfolioGrid
+                    rowData={checked ? pastedData : data.Exceldata}
+                    columnDefs={columnDefs}
+                  />
+                  <Flex gap="10px" mt="md">
+                    <Button onClick={() => setActive(0)}>Re-upload</Button>
+                    <Button onClick={() => setActive(2)} style={{ float: "right" }}>
+                      Next
+                    </Button>
+                  </Flex>
+                </>
+              ) : (
+                <Center>No data found. Please re-upload or paste data.</Center>
+              )}
+            </>
+          )}
 
-          <Checkbox
-            mt="md"
-            label="Shared With Team"
-            checked={sharedWithTeam}
-            onChange={(e) => setSharedWithTeam(e.currentTarget.checked)}
-          />
+          {active === 2 && (
+            <>
+              <Flex gap="20px" align="center">
+                <TextInput
+                  label="Portfolio Name"
+                  placeholder="Portfolio Name"
+                  value={portfolioName}
+                  onChange={(e) => setPortfolioName(e.target.value)}
+                  required
+                />
+                <TextInput
+                  label="Comments"
+                  placeholder="Comments"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                />
+              </Flex>
 
-          <Button
-            mt="lg"
-            onClick={handleUpload}
-            disabled={!portfolioName || (!file && pastedData.length === 0)}
-            style={{ float: "right" }}
-          >
-            Create portfolio
-          </Button>
-        </Stepper.Step>
+              <Checkbox
+                mt="md"
+                label="Shared With Team"
+                checked={sharedWithTeam}
+                onChange={(e) => setSharedWithTeam(e.currentTarget.checked)}
+              />
 
-        {/* ---------------- COMPLETED ---------------- */}
-        <Stepper.Completed>
-          Portfolio process completed!
-        </Stepper.Completed>
-      </Stepper>
-    </Stack>
+              <Button
+                mt="lg"
+                onClick={handleUpload}
+                disabled={!portfolioName || (!file && pastedData.length === 0)}
+                style={{ float: "right" }}
+              >
+                Create portfolio
+              </Button>
+            </>
+          )}
+
+          {active === 3 && (
+            <Center>
+              <Text fw={500} color="green">
+                🎉 Portfolio process completed!
+              </Text>
+            </Center>
+          )}
+        </Card>
+      </Flex>
+    </>
+
   );
 };
 

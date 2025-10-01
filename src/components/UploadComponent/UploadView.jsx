@@ -25,7 +25,7 @@ const UploadView = () => {
   const [portfolioName, setPortfolioName] = useState("");
   const [comment, setComment] = useState("");
   const [file, setFile] = useState(null);
-  const [data, setData] = useState({ fileId: "", Exceldata: [] });
+  const [data, setData] = useState({ fileId: "", Exceldata: [], list_type:null });
   const [columnDefs, setColumnDefs] = useState([]);
   const [checked, setChecked] = useState(false);
   const [headerChecked, setHeaderChecked] = useState(false);
@@ -76,6 +76,7 @@ const UploadView = () => {
       comment,
       data: { ...data, Exceldata: processedData },
       sharedWithTeam,
+      list_type:data.list_type
     });
 
     setActive(3);
@@ -93,7 +94,7 @@ const UploadView = () => {
         true
       );
       setFile(file);
-      setData({ file_id: response?.file_id, Exceldata: response.data });
+      setData({ file_id: response?.file_id, Exceldata: response.data, list_type:response.list_type });
       setActive(1); // move to step 2 after upload
     } catch (error) {
       console.error("Error uploading file:", error);

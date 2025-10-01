@@ -46,7 +46,7 @@ class PortfolioStore {
     }
   }
 
-  async addPortfolio({ fileName, Comment, portfolioName, data,SharedWithteam }) {
+  async addPortfolio({ fileName, Comment, portfolioName, data,SharedWithteam, list_type }) {
     this.loading = true;
     this.error = null;
     const poolValue = data.Exceldata[0]?.pool_number;
@@ -56,7 +56,7 @@ class PortfolioStore {
     const CusipId = cusipValue ? cusipValue.match(/^[A-Za-z0-9]{9}$/) : null;
     const Data = data.Exceldata?.map((item) => {
       return {
-        cusip: item.pool_number || item.cusip,
+        cusip: list_type == 'cusip'? item.cusip: list_type == 'pool_number'? item.agy_short + " " + item.pool_number:null,
         value: item.face_amt || item.orig_face || null,
       }
     })
@@ -69,7 +69,7 @@ class PortfolioStore {
         file_id: data?.file_id,
         filename: fileName,
         pool_count: data.Exceldata?.length || 0,
-        list_type: PoolId ? "pool_number" : CusipId ? "cusip" : "Invalid",
+        list_type: list_type,
         prefixed: true,
         data: Data,
 

@@ -19,19 +19,21 @@ import { apiClient } from "@API/apiservises";
 import APIEndpoints from "@API/profile/APIEndpoints";
 import CopyPaste from "@components/UploadComponent/CopyPaste";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const UploadView = () => {
   const [active, setActive] = useState(0); // step index
   const [portfolioName, setPortfolioName] = useState("");
   const [comment, setComment] = useState("");
   const [file, setFile] = useState(null);
-  const [data, setData] = useState({ fileId: "", Exceldata: [], list_type:null });
+  const [data, setData] = useState({ fileId: "", Exceldata: [], list_type: null });
   const [columnDefs, setColumnDefs] = useState([]);
   const [checked, setChecked] = useState(false);
   const [headerChecked, setHeaderChecked] = useState(false);
   const [sharedWithTeam, setSharedWithTeam] = useState(false);
   const [pastedData, setPastedData] = useState([]);
-
+  const navigate = useNavigate();
+  const [PortfolioIdFromAPI, setPortfolioIdFromAPI] = useState()
   // Generate columnDefs dynamically
   useEffect(() => {
     const allKeys = new Set();
@@ -70,15 +72,15 @@ const UploadView = () => {
       });
     }
 
-    portfolioStore.addPortfolio({
+    const PortfolioId = await portfolioStore.addPortfolio({
       fileName: checked ? "" : file?.name,
       portfolioName,
       comment,
       data: { ...data, Exceldata: processedData },
       sharedWithTeam,
-      list_type:data.list_type
+      list_type: data.list_type
     });
-
+    setPortfolioIdFromAPI(PortfolioId)
     setActive(3);
   };
 
@@ -94,7 +96,7 @@ const UploadView = () => {
         true
       );
       setFile(file);
-      setData({ file_id: response?.file_id, Exceldata: response.data, list_type:response.list_type });
+      setData({ file_id: response?.file_id, Exceldata: response.data, list_type: response.list_type });
       setActive(1); // move to step 2 after upload
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -103,25 +105,6 @@ const UploadView = () => {
 
   return (
     <>
-      <Flex
-        align="center"
-        justify="space-between"
-        wrap="wrap"
-        mb="md"
-        style={{ fontSize: "14px", color: "#adb5bd" }}
-      >
-        <Badge color="teal" variant="light" radius="sm">
-          1. Upload cusip/pool (face amount optional)
-        </Badge>
-        <Divider orientation="vertical" mx="sm" />
-        <Badge color="blue" variant="light" radius="sm">
-          2. Copy & paste columns (optional)
-        </Badge>
-        <Divider orientation="vertical" mx="sm" />
-        <Badge color="grape" variant="light" radius="sm">
-          3. Preview before next step
-        </Badge>
-      </Flex>
       <Flex gap="lg" align="flex-start">
         {/* Left: Stepper only */}
         <Stepper
@@ -129,7 +112,7 @@ const UploadView = () => {
           onStepClick={setActive}
           orientation="vertical"
           allowNextStepsSelect={false}
-          style={{ minWidth: 200}}
+          style={{ minWidth: 200 }}
         >
           <Stepper.Step label="Upload Data" description="Upload or paste data" />
           <Stepper.Step label="Review Data" description="Validate uploaded data" />
@@ -138,7 +121,29 @@ const UploadView = () => {
         </Stepper>
 
         {/* Right: Step Content inside Card */}
-        <Card shadow="md" mih={230} radius="lg"  style={{ flex: 1 }}>
+        <Card shadow="md" mih={230} radius="lg" style={{ flex: 1 }}>
+          {active === 0 && (
+            <Flex
+              align="center"
+              justify="space-between"
+              wrap="wrap"
+              mb="md"
+              style={{ fontSize: "14px", color: "#adb5bd" }}
+            >
+              <Badge color="teal" variant="light" radius="sm">
+                1. Upload cusip/pool (face amount optional)
+              </Badge>
+              <Divider orientation="vertical" mx="sm" />
+              <Badge color="blue" variant="light" radius="sm">
+                2. Copy & paste columns (optional)
+              </Badge>
+              <Divider orientation="vertical" mx="sm" />
+              <Badge color="grape" variant="light" radius="sm">
+                3. Preview before next step
+              </Badge>
+            </Flex>
+          )}
+
           {active === 0 && (
             <>
               <Center>
@@ -152,7 +157,7 @@ const UploadView = () => {
                 )}
               </Center>
 
-              <Flex gap="20px" align="center"  justify='space-between'>
+              <Flex gap="20px" align="center" justify='space-between'>
                 <Flex gap="20px" align="center">
                   <Checkbox
                     label="Paste Data"
@@ -238,11 +243,22 @@ const UploadView = () => {
           )}
 
           {active === 3 && (
-            <Center>
-              <Text fw={500} color="green">
-                🎉 Portfolio process completed!
-              </Text>
-            </Center>
+            <>
+              <Center>
+                <Text fw={500} color="green">
+                  🎉 Portfolio process completed!
+                </Text>
+              </Center>
+              <Button onClick={() => {
+                navigate(`/portfolio/${PortfolioIdFromAPI}`, {
+                  state: { portfolioId: PortfolioIdFromAPI },
+                })
+              }}>
+                Go to Holding view
+              </Button>
+            </>
+
+
           )}
         </Card>
       </Flex>

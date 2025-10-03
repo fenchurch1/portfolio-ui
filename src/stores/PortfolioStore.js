@@ -88,6 +88,7 @@ class PortfolioStore {
         });
         this.loading = false;
       });
+      return response?.portfolio_id;
     } catch (error) {
       runInAction(() => {
         this.error = error.message || "Something went wrong";

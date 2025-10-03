@@ -103,6 +103,18 @@ const UploadView = () => {
     }
   };
 
+  const handlePasteStep=async()=>{
+     try {
+      const response = await apiClient.post(
+        APIEndpoints.uploadFile,
+        "",
+        pastedData
+      );
+      setActive(1); // move to step 2 after upload
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  }
   return (
     <>
       <Flex gap="lg" align="flex-start">
@@ -172,7 +184,7 @@ const UploadView = () => {
                 </Flex>
                 <Button
                   mt="lg"
-                  onClick={() => setActive(1)}
+                  onClick={() => handlePasteStep()}
                   disabled={!checked && !file}
                   style={{ float: "right" }}
                 >

@@ -32,6 +32,7 @@ const UploadView = () => {
   const [headerChecked, setHeaderChecked] = useState(false);
   const [sharedWithTeam, setSharedWithTeam] = useState(false);
   const [pastedData, setPastedData] = useState([]);
+  const [pastedDataResponse, setpastedDataResponse] = useState([])
   const navigate = useNavigate();
   const [PortfolioIdFromAPI, setPortfolioIdFromAPI] = useState()
   // Generate columnDefs dynamically
@@ -48,7 +49,9 @@ const UploadView = () => {
     }));
     setColumnDefs(defs);
   }, [data.Exceldata]);
-
+  const poolRegex = /^[A-Za-z]{2} [A-Za-z0-9]{6}$/;
+  const cusipRegex = /^[A-Za-z0-9]{9}$/;
+  const UserId = localStorage.getItem("UserId");
   const handleUpload = async () => {
     if (checked && pastedData.length === 0) {
       toast.error("Please paste data before uploading.");
@@ -57,20 +60,18 @@ const UploadView = () => {
 
     let processedData = data.Exceldata;
 
-    if (checked && pastedData.length > 0) {
-      const poolRegex = /^[A-Za-z]{2} [A-Za-z0-9]{6}$/;
-      const cusipRegex = /^[A-Za-z0-9]{9}$/;
+    // if (checked && pastedData.length > 0) {
 
-      processedData = pastedData.map((item) => {
-        const obj = {};
-        item.forEach((subItem) => {
-          if (cusipRegex.test(subItem)) obj.cusip = subItem;
-          else if (poolRegex.test(subItem)) obj.pool_number = subItem;
-          else obj.orig_face = subItem;
-        });
-        return obj;
-      });
-    }
+    //   processedData = pastedData.map((item) => {
+    //     const obj = {};
+    //     item.forEach((subItem) => {
+    //       if (cusipRegex.test(subItem)) obj.cusip = subItem;
+    //       else if (poolRegex.test(subItem)) obj.pool_number = subItem;
+    //       else obj.orig_face = subItem;
+    //     });
+    //     return obj;
+    //   });
+    // }
 
     const PortfolioId = await portfolioStore.addPortfolio({
       fileName: checked ? "" : file?.name,
@@ -87,7 +88,7 @@ const UploadView = () => {
   const extractFile = async (file) => {
     const formData = new FormData();
     formData.append("filename", file);
-    formData.append("user_id", 1);
+    formData.append("user_id", UserId);
     try {
       const response = await apiClient.post(
         APIEndpoints.uploadFile,
@@ -103,13 +104,28 @@ const UploadView = () => {
     }
   };
 
-  const handlePasteStep=async()=>{
-     try {
+  const handlePasteStep = async () => {
+    const ModifiedPasteData = pastedData.map((item) => {
+      const obj = {};
+      item.forEach((subItem) => {
+        if (cusipRegex.test(subItem)) obj.cusip = subItem;
+        else if (poolRegex.test(subItem)) obj.pool_number = subItem;
+        else obj.orig_face = subItem;
+      });
+      return obj;
+    });
+
+    const PastedformData = new FormData();
+    PastedformData.append("data", JSON.stringify(ModifiedPasteData));
+
+    try {
       const response = await apiClient.post(
         APIEndpoints.uploadFile,
         "",
-        pastedData
+        PastedformData,
+        true
       );
+      setData({ file_id: response?.file_id, Exceldata: response.data, list_type: response.list_type });
       setActive(1); // move to step 2 after upload
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -201,7 +217,7 @@ const UploadView = () => {
               {data.Exceldata.length > 0 || pastedData.length > 0 ? (
                 <>
                   <PortfolioGrid
-                    rowData={checked ? pastedData : data.Exceldata}
+                    rowData={data.Exceldata}
                     columnDefs={columnDefs}
                   />
                   <Flex gap="10px" mt="md">

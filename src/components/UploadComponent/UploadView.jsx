@@ -220,7 +220,7 @@ const UploadView = () => {
                     rowData={data.Exceldata}
                     columnDefs={columnDefs}
                   />
-                  <Flex gap="10px" mt="md">
+                  <Flex gap="10px" mt="md" justify='space-between'>
                     <Button onClick={() => setActive(0)}>Re-upload</Button>
                     <Button onClick={() => setActive(2)} style={{ float: "right" }}>
                       Next
@@ -258,15 +258,17 @@ const UploadView = () => {
                 checked={sharedWithTeam}
                 onChange={(e) => setSharedWithTeam(e.currentTarget.checked)}
               />
+              <Flex justify="end">
+                <Button
+                  mt="lg"
+                  onClick={handleUpload}
+                  disabled={!portfolioName || (!file && pastedData.length === 0)}
+                  style={{ float: "right" }}
+                >
+                  Create portfolio
+                </Button>
+              </Flex>
 
-              <Button
-                mt="lg"
-                onClick={handleUpload}
-                disabled={!portfolioName || (!file && pastedData.length === 0)}
-                style={{ float: "right" }}
-              >
-                Create portfolio
-              </Button>
             </>
           )}
 
@@ -277,13 +279,19 @@ const UploadView = () => {
                   🎉 Portfolio process completed!
                 </Text>
               </Center>
-              <Button onClick={() => {
-                navigate(`/portfolio/${PortfolioIdFromAPI}`, {
-                  state: { portfolioId: PortfolioIdFromAPI },
-                })
-              }}>
-                Go to Holding view
-              </Button>
+              <br/>
+              <Center>
+                <Button onClick={() => {
+                  navigate(`/portfolio/${PortfolioIdFromAPI}`, {
+                    state: { portfolioId: PortfolioIdFromAPI },
+                  })
+                }}
+                  w='200px'
+                >
+                  Go to Holding view
+                </Button>
+              </Center>
+
             </>
 
 

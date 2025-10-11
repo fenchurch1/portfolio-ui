@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { apiClient } from "@API/apiservises";
 import APIEndpoints from "@API/profile/APIEndpoints";
@@ -6,9 +6,10 @@ import PortfolioGrid from "@utils/Table/PortfolioGrid";
 import { useLocation } from "react-router-dom";
 import { Select, Button } from "@mantine/core";
 import SharePortfolioModal from "./SharePortfolioModal";
+import { generateColumnDefs } from "../../utils/helperFunctions";
 
 const PortfolioHoldings = observer(() => {
-  const [portFolioDetails, setPortfolioDetails] = useState([]);
+  const [portFolioDetails, setPortfolioDetails] = useState({});
   const [coloumdefsFortable, setColoumDefsForTable] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [AllPortfolios, setAllportfolios] = useState({});
@@ -27,26 +28,26 @@ const PortfolioHoldings = observer(() => {
           .replace("{portfolioId}", portfolioId)
       );
       const data = response.portfolio_details || [];
-      setPortfolioDetails(data);
+      setPortfolioDetails(response);
 
       // Build dynamic columns
-      if (data.length > 0) {
-        const allKeys = new Set();
-        data.forEach((obj) => {
-          Object.keys(obj).forEach((key) => allKeys.add(key));
-        });
+      // if (data.length > 0) {
+      //   const allKeys = new Set();
+      //   data.forEach((obj) => {
+      //     Object.keys(obj).forEach((key) => allKeys.add(key));
+      //   });
 
-        const columnDefs = Array.from(allKeys).map((key) => ({
-          headerName: key
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, (c) => c.toUpperCase()),
-          field: key,
-          flex: 1,
-          width: 150,
-        }));
+      //   const columnDefs = Array.from(allKeys).map((key) => ({
+      //     headerName: key
+      //       .replace(/_/g, " ")
+      //       .replace(/\b\w/g, (c) => c.toUpperCase()),
+      //     field: key,
+      //     flex: 1,
+      //     width: 150,
+      //   }));
 
-        setColoumDefsForTable(columnDefs);
-      }
+      //   setColoumDefsForTable(columnDefs);
+      // }
     } catch (error) {
       console.error("Error fetching portfolios:", error);
     }
@@ -80,6 +81,8 @@ const PortfolioHoldings = observer(() => {
     };
     fetchAll();
   }, [portfolioId, UserId]);
+  const columnDefs = useMemo(() => generateColumnDefs(portFolioDetails?.col_defs), [portFolioDetails?.col_defs]);
+
 
   const sharedPortfolio = async (selected) => {
     console.log("Selected", selected);
@@ -182,8 +185,8 @@ const PortfolioHoldings = observer(() => {
 
       {/* Table */}
       <PortfolioGrid
-        rowData={portFolioDetails}
-        columnDefs={coloumdefsFortable}
+        rowData={portFolioDetails?.portfolio_details || []}
+        columnDefs={columnDefs}
       />
       <SharePortfolioModal
         opened={shareOpened}

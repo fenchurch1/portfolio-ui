@@ -6,16 +6,18 @@ import './AgGridCustomStyles.css';
 import { Box, useComputedColorScheme } from '@mantine/core';
 
 const PortfolioGrid = ({ rowData, columnDefs }) => {
+  console.log("PortfolioGrid columnDefs", columnDefs);
+  
   const gridRef = useRef();
   const [pageSize, setPageSize] = useState(10);
   const computedColorScheme = useComputedColorScheme();
   const [selectedFile, setSelectedFile] = useState([]);
 
-  console.log("rowData",rowData);
+  console.log("rowData", rowData);
   const onGridReady = (params) => {
-  gridRef.current = params.api;
-  params.api.setPaginationPageSize(20); // Set your desired page size
-};
+    gridRef.current = params.api;
+    params.api.setPaginationPageSize(20); // Set your desired page size
+  };
 
   const handleFileClick = (fileData) => {
     const matched = rowData.find(item => item.fileName === fileData.fileName);
@@ -63,7 +65,14 @@ const PortfolioGrid = ({ rowData, columnDefs }) => {
   ];
 
   const themeClass = computedColorScheme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-
+  const statusBar = {
+    statusPanels: [
+      {
+        statusPanel: 'agTotalRowCountComponent',
+        align: 'right',
+      }
+    ]
+  };
   return (
     <>
       <Box className={themeClass} style={{ width: '100%' }}>
@@ -78,6 +87,17 @@ const PortfolioGrid = ({ rowData, columnDefs }) => {
           domLayout="autoHeight"
           icons={paginationIcons}
           theme="legacy"
+          statusBar={statusBar}
+          headerHeight={40}
+          rowSelection="multiple"
+          rowHeight={40}
+          suppressScrollOnNewData={true}
+          suppressHorizontalScroll={false}
+
+          // Performance optimizations
+          suppressColumnVirtualisation={false} // Enable column virtualization
+          suppressRowVirtualisation={false}    // Enable row virtualization
+          animateRows={false}                  // Disable row animations for better performance
         />
       </Box>
     </>
@@ -85,3 +105,9 @@ const PortfolioGrid = ({ rowData, columnDefs }) => {
 };
 
 export default PortfolioGrid;
+/**
+ * Generate AG Grid column definitions from backend col_defs
+ * Supports dynamic D3-based formatters from backend
+ */
+
+

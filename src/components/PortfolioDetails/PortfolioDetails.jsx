@@ -7,6 +7,7 @@ import PortfolioGrid from "@utils/Table/PortfolioGrid";
 import PortfolioGraph from "@components/PortfolioDetails/PortfolioGraph";
 import BadgesList from "@utils/Badge/BadgesList";
 import SharePortfolioModal from "@components/AllPortfolios/SharePortfolioModal";
+import { generateColumnDefs } from "../../utils/helperFunctions";
 
 const PortfolioDetails = () => {
   const computedColorScheme = useComputedColorScheme();
@@ -57,11 +58,7 @@ const PortfolioDetails = () => {
           { label: "Invalid Pools", value: InvalidPools, BackgroundColor: "#F8D7DA", TextColor: "#721C24" },
         ];
 
-        const columnDefs = Array.from(response?.table_headers || []).map(key => ({
-          headerName: key,
-          field: key,
-          flex: 1,
-        }));
+          const columnDefs =generateColumnDefs(response?.col_defs)
 
         setPortfolioData({
           columnDefs,

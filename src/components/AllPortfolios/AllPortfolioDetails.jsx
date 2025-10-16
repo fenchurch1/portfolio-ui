@@ -5,6 +5,7 @@ import APIEndpoints from '@API/profile/APIEndpoints';
 import PortfolioGrid from '@utils/Table/PortfolioGrid';
 import { Tabs, Button } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
+import { generateColumnDefs } from '@utils/helperFunctions';
 
 const AllPortfolioDetails = observer(() => {
   const [portFolioDetails, setPortfolioDetails] = useState({
@@ -30,6 +31,7 @@ const AllPortfolioDetails = observer(() => {
         if (!isMounted) return; // ✅ Prevent state update if unmounted
 
         const data = response.portfolio_data;
+        const HeaderData=response?.col_defs || {};
 
         // Prepare portfolio lists
         setPortfolioDetails({
@@ -40,7 +42,7 @@ const AllPortfolioDetails = observer(() => {
         });
 
         // ✅ Function to generate column definitions dynamically
-        const generateColumnDefs = (dataset) => {
+        const generateColumnDefsForAll = (dataset) => {
           const keys = new Set();
 
           dataset.forEach((obj) => {
@@ -99,14 +101,14 @@ const AllPortfolioDetails = observer(() => {
         };
 
         // ✅ Generate colDefs for all 4 datasets separately
-        const colDefsForAll = generateColumnDefs([
+        const colDefsForAll = generateColumnDefsForAll([
           ...data.owned_portfolios,
           ...data.shared_with_me_portfolios,
         ]);
 
-        const colDefsForShared = generateColumnDefs(data.shared_with_me_portfolios);
-        const colDefsForMine = generateColumnDefs(data.owned_portfolios);
-        const colDefsForSharedByMe = generateColumnDefs(data.shared_by_me_portfolios);
+        const colDefsForShared = generateColumnDefs(HeaderData.shared_with_me_portfolios);
+        const colDefsForMine = generateColumnDefs(HeaderData.owned_portfolios);
+        const colDefsForSharedByMe = generateColumnDefs(HeaderData.shared_by_me_portfolios);
 
         // ✅ Store all colDefs in state (optional)
         setcoloumdefsFortable({

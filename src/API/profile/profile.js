@@ -1,5 +1,5 @@
 const profile = {
-    dev:"http://172.20.1.81:6111",
+    dev:"http://172.20.1.82:6111",
     //dev:"http://192.168.1.7:5000",
     prod:"https://api.example.com",
     Test:"https://staging.api.example.com",

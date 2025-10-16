@@ -7,7 +7,7 @@ import PortfolioGrid from "@utils/Table/PortfolioGrid";
 import PortfolioGraph from "@components/PortfolioDetails/PortfolioGraph";
 import BadgesList from "@utils/Badge/BadgesList";
 import SharePortfolioModal from "@components/AllPortfolios/SharePortfolioModal";
-import { generateColumnDefs } from "../../utils/helperFunctions";
+import { generateColumnDefs } from "@utils/helperFunctions";
 
 const PortfolioDetails = () => {
   const computedColorScheme = useComputedColorScheme();

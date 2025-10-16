@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 export const generateColumnDefs = (colDefsFromBackend = []) => {
-    debugger
     if (!Array.isArray(colDefsFromBackend) || colDefsFromBackend.length === 0) {
         return [];
     }

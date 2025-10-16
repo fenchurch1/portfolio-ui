@@ -6,7 +6,7 @@ import PortfolioGrid from "@utils/Table/PortfolioGrid";
 import { useLocation } from "react-router-dom";
 import { Select, Button } from "@mantine/core";
 import SharePortfolioModal from "./SharePortfolioModal";
-import { generateColumnDefs } from "../../utils/helperFunctions";
+import { generateColumnDefs } from "@utils/helperFunctions";
 
 const PortfolioHoldings = observer(() => {
   const [portFolioDetails, setPortfolioDetails] = useState({});

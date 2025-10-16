@@ -17,6 +17,7 @@ const AllPortfolioDetails = observer(() => {
   const [coloumdefsFortable, setcoloumdefsFortable] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+console.log("coloumdefsFortable",coloumdefsFortable);
 
   useEffect(() => {
     let isMounted = true;

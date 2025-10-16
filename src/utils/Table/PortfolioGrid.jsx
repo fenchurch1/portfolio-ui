@@ -28,8 +28,8 @@ const PortfolioGrid = ({ rowData, columnDefs }) => {
     sortable: true,
     filter: true,
     resizable: true,
-    flex: 1,
-    minWidth: 100,
+    // flex: 1,
+    // minWidth: 100,
   }), []);
 
   const columnDefsForModal = [
